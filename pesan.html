@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight and Hotel Booking</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background-color: #03A9F4;
+            color: #fff;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+        }
+        .section {
+            padding: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .section:last-child {
+            border-bottom: none;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .button {
+            display: inline-block;
+            background: #FF9800;
+            color: #fff;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .package-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .package {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .package .details {
+            flex: 1;
+        }
+        .package .price {
+            text-align: right;
+        }
+        .price strong {
+            color: #FF5722;
+            font-size: 18px;
+        }
+        .invoice {
+            padding: 20px;
+            background: url("assets/img/logo-dd.jpg") no-repeat center;
+            background-size: cover;
+            opacity: 0.5; /* Membuat gambar latar belakang lebih pudar */
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 20px 0;
+            color: black; /* Mengubah warna teks di dalam invoice menjadi oklat */
+        }
+        .invoice-header h3,
+        .invoice-footer {
+            color: black; /* Mengubah warna teks header dan footer menjadi oklat */
+        }
+        .invoice-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .invoice-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        .invoice-footer {
+            text-align: right;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">Edit Your Stay Details</div>
+        <div class="section">
+            <div class="form-group">
+                <label>Stay in</label>
+                <input type="text" id="city" placeholder="Enter your city">
+            </div>
+            <div class="form-group">
+                <label>Check-in Date</label>
+                <input type="date" id="checkinDate">
+            </div>
+            <div class="form-group">
+                <label>Stay Duration</label>
+                <input type="number" id="duration" placeholder="Enter duration in nights">
+            </div>
+            <div class="form-group">
+                <label>Guests</label>
+                <input type="number" id="guests" placeholder="Enter number of guests">
+            </div>
+            <div class="form-group">
+                <label>Room(s)</label>
+                <input type="number" id="rooms" placeholder="Enter number of rooms">
+            </div>
+            <button class="button" onclick="generateInvoice()">Generate Invoice</button>
+        </div>
+
+        <div class="header">Invoice</div>
+        <div class="invoice" id="invoice">
+            <div class="invoice-header">
+                <h3>Booking Invoice</h3>
+                <p id="invoiceDetails">Invoice details will appear here.</p>
+            </div>
+            <div class="invoice-footer" id="totalPrice"></div>
+        </div>
+    </div>
+
+    <script>
+        async function generateInvoice() {
+    const city = document.getElementById('city').value;
+    const checkinDate = document.getElementById('checkinDate').value;
+    const duration = document.getElementById('duration').value;
+    const guests = document.getElementById('guests').value;
+    const rooms = document.getElementById('rooms').value;
+
+    if (!city || !checkinDate || !duration || !guests || !rooms) {
+        alert('Please fill out all fields.');
+        return;
+    }
+
+    const pricePerRoom = 120000;
+    const totalPrice = rooms * pricePerRoom;
+
+    const invoiceDetails = `City: ${city}<br>Check-in Date: ${checkinDate}<br>Duration: ${duration} night(s)<br>Guests: ${guests}<br>Rooms: ${rooms}<br>Price per room: Rp ${pricePerRoom.toLocaleString()}`;
+
+    document.getElementById('invoiceDetails').innerHTML = invoiceDetails;
+    document.getElementById('totalPrice').textContent = `Total Price: Rp ${totalPrice.toLocaleString()}`;
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+        unit: "mm",  // Menetapkan satuan untuk ukuran dalam milimeter
+        format: [80, 110]  // Menetapkan ukuran halaman menjadi 80mm x 110mm
+    });
+
+    // Membuat gambar dengan transparansi menggunakan canvas
+    const img = new Image();
+    img.src = "assets/img/logo-dd.jpg";  // URL gambar latar belakang
+    img.onload = function () {
+        // Membuat canvas untuk memanipulasi gambar
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        // Menetapkan ukuran canvas sesuai dengan ukuran halaman PDF
+        canvas.width = 80 * 2;  // Ukuran PDF 80mm, kita kalikan dengan 2 untuk piksel
+        canvas.height = 110 * 2;  // Ukuran PDF 110mm
+
+        // Gambar dimasukkan ke canvas dengan transparansi
+        ctx.globalAlpha = 0.9; // Mengatur transparansi gambar
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        // Mengonversi canvas menjadi data URL (base64)
+        const dataUrl = canvas.toDataURL("image/jpeg");
+
+        // Menambahkan gambar latar belakang yang sudah diproses transparansi ke dalam PDF
+        pdf.addImage(dataUrl, 'JPEG', 0, 0, 80, 110);  // Menambahkan gambar dengan transparansi
+
+        // Menambahkan teks di atas gambar latar belakang
+        pdf.setFont("helvetica", "normal");  // Menyeting font ke Helvetica (bisa diubah sesuai kebutuhan)
+        pdf.setTextColor(0, 0, 0);  // Mengatur warna teks menjadi hitam (warna gelap)
+        pdf.setFontSize(6);  // Mengatur ukuran font lebih kecil untuk menyesuaikan dengan ukuran halaman
+        
+        pdf.text("Booking Invoice", 5, 10); // Judul
+
+        pdf.setFontSize(4);
+        pdf.text(`City: ${city}`, 5, 20);
+        pdf.text(`Check-in Date: ${checkinDate}`, 5, 25);
+        pdf.text(`Duration: ${duration} night(s)`, 5, 30);
+        pdf.text(`Guests: ${guests}`, 5, 35);
+        pdf.text(`Rooms: ${rooms}`, 5, 40);
+        pdf.text(`Price per room: Rp ${pricePerRoom.toLocaleString()}`, 5, 45);
+        pdf.text(`Total Price: Rp ${totalPrice.toLocaleString()}`, 5, 50);
+
+        pdf.save("invoice.pdf");
+    };
+}
+
+    </script>
+</body>
+</html>
