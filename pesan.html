@@ -10,12 +10,16 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background-image: url("assets/img/mangrovepik.jpg"); /* URL gambar latar belakang */
+            background-size: cover; /* Menutup seluruh halaman */
+            background-position: center; /* Memusatkan gambar */
+            background-repeat: no-repeat;
+            background-attachment: fixed; /* Membuat latar belakang tetap saat scrolling */
         }
         .container {
             max-width: 900px;
             margin: 20px auto;
-            background: #fff;
+            background: rgba(255, 255, 255, 0.9); /* Latar belakang semi transparan */
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             overflow: hidden;
@@ -58,42 +62,17 @@
             border-radius: 4px;
             cursor: pointer;
         }
-        .package-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .package {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            background: #fafafa;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .package .details {
-            flex: 1;
-        }
-        .package .price {
-            text-align: right;
-        }
-        .price strong {
-            color: #FF5722;
-            font-size: 18px;
-        }
         .invoice {
             padding: 20px;
-            background: url("assets/img/logo-dd.jpg") no-repeat center;
-            background-size: cover;
-            opacity: 0.5; /* Membuat gambar latar belakang lebih pudar */
+            background: rgba(255, 255, 255, 0.85); /* Warna latar belakang semi transparan */
             border: 1px solid #ddd;
             border-radius: 8px;
             margin: 20px 0;
-            color: black; /* Mengubah warna teks di dalam invoice menjadi oklat */
+            color: black;
         }
         .invoice-header h3,
         .invoice-footer {
-            color: black; /* Mengubah warna teks header dan footer menjadi oklat */
+            color: black;
         }
         .invoice-header {
             text-align: center;
@@ -169,58 +148,10 @@
 
             document.getElementById('invoiceDetails').innerHTML = invoiceDetails;
             document.getElementById('totalPrice').textContent = `Total Price: Rp ${totalPrice.toLocaleString()}`;
-
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF({
-                unit: "mm",  // Menetapkan satuan untuk ukuran dalam milimeter
-                format: [80, 110]  // Menetapkan ukuran halaman menjadi 80mm x 110mm
-            });
-
-            // Membuat gambar dengan transparansi menggunakan canvas
-            const img = new Image();
-            img.src = "assets/img/logo-dd.jpg";  // URL gambar latar belakang
-            img.onload = function () {
-                // Membuat canvas untuk memanipulasi gambar
-                const canvas = document.createElement("canvas");
-                const ctx = canvas.getContext("2d");
-
-                // Menetapkan ukuran canvas sesuai dengan ukuran halaman PDF
-                canvas.width = 80 * 2;  // Ukuran PDF 80mm, kita kalikan dengan 2 untuk piksel
-                canvas.height = 110 * 2;  // Ukuran PDF 110mm
-
-                // Gambar dimasukkan ke canvas dengan transparansi
-                ctx.globalAlpha = 0.9; // Mengatur transparansi gambar
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                // Mengonversi canvas menjadi data URL (base64)
-                const dataUrl = canvas.toDataURL("image/jpeg");
-
-                // Menambahkan gambar latar belakang yang sudah diproses transparansi ke dalam PDF
-                pdf.addImage(dataUrl, 'JPEG', 0, 0, 80, 110);  // Menambahkan gambar dengan transparansi
-
-                // Menambahkan teks di atas gambar latar belakang
-                pdf.setFont("helvetica", "normal");  // Menyeting font ke Helvetica (bisa diubah sesuai kebutuhan)
-                pdf.setTextColor(0, 0, 0);  // Mengatur warna teks menjadi hitam (warna gelap)
-                pdf.setFontSize(6);  // Mengatur ukuran font lebih kecil untuk menyesuaikan dengan ukuran halaman
-                
-                pdf.text("Booking Invoice", 5, 10); // Judul
-
-                pdf.setFontSize(4);
-                pdf.text(`City: ${city}`, 5, 20);
-                pdf.text(`Check-in Date: ${checkinDate}`, 5, 25);
-                pdf.text(`Duration: ${duration} night(s)`, 5, 30);
-                pdf.text(`Guests: ${guests}`, 5, 35);
-                pdf.text(`Rooms: ${rooms}`, 5, 40);
-                pdf.text(`Price per room: Rp ${pricePerRoom.toLocaleString()}`, 5, 45);
-                pdf.text(`Total Price: Rp ${totalPrice.toLocaleString()}`, 5, 50);
-
-                pdf.save("invoice.pdf");
-            };
         }
 
-        // Fungsi untuk kembali ke halaman sebelumnya
         function goBack() {
-            window.history.back();  // Mengembalikan ke halaman sebelumnya
+            window.history.back();
         }
     </script>
 </body>
